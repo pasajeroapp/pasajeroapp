@@ -12,67 +12,48 @@
 <!-- Librería para leer KML -->
 <script src="https://unpkg.com/leaflet-omnivore/leaflet-omnivore.min.js"></script>
 
+<!-- Plugin botón de ubicación -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
+<script src="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
+
 <style>
   body, html { margin: 0; padding: 0; height: 100%; }
   #map { width: 100%; height: 100vh; }
 </style>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.css" />
-<script src="https://unpkg.com/leaflet.locatecontrol/dist/L.Control.Locate.min.js"></script>
-  
 </head>
 <body>
 
 <div id="map"></div>
 
 <script>
-  // Crear el mapa
-  var map = L.map('map').setView([32.5149, -117.0382], 12); // Coordenadas de Tijuana
+  // Crear el mapa centrado en Tijuana
+  var map = L.map('map').setView([32.5149, -117.0382], 12);
 
-  // Capa base OpenStreetMap (gratis)
+  // Capa base OpenStreetMap
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contrib.',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
     maxZoom: 19
   }).addTo(map);
 
-  // Cargar archivo KML (debe estar en la misma carpeta que este HTML)
-  omnivore.kml('rutas_nocturnas.kml')
-    .on('ready', function(layer) {
-      map.fitBounds(layer.target.getBounds()); // Ajusta el mapa a las rutas
-    })
-    .addTo(map);
-</script>
+  // Cargar archivos KML (puedes agregar más)
+  omnivore.kml('rutas_nocturnas.kml', null, L.geoJson(null, {
+    style: { color: 'blue', weight: 3 }
+  })).addTo(map);
 
-L.control.locate({
+  omnivore.kml('rutas_diurnas.kml', null, L.geoJson(null, {
+    style: { color: 'green', weight: 3 }
+  })).addTo(map);
+
+  // Botón para mostrar ubicación actual
+  L.control.locate({
     position: 'topleft',
     strings: {
-        title: "Mostrar mi ubicación"
+      title: "Mostrar mi ubicación"
     },
-    flyTo: true
-}).addTo(map);
+    flyTo: true,
+    keepCurrentZoomLevel: false
+  }).addTo(map);
+</script>
 
-// Activar geolocalización
-map.locate({setView: true, maxZoom: 16});
-
-// Mostrar marcador en la ubicación actual
-function onLocationFound(e) {
-    var radius = e.accuracy / 2;
-
-    L.marker(e.latlng).addTo(map)
-        .bindPopup("Estás aquí").openPopup();
-
-    L.circle(e.latlng, radius, {color: 'blue', fillOpacity: 0.2}).addTo(map);
-}
-
-map.on('locationfound', onLocationFound);
-
-// Manejar errores de geolocalización
-function onLocationError(e) {
-    alert(e.message);
-}
-
-map.on('locationerror', onLocationError);
-  
 </body>
-
 </html>
